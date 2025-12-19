@@ -1,12 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
   const [toDoChores, setToDoChores] = useState(["1", "2"]);
   const [doneChores, setDoneChores] = useState(["3", "4"]);
+  const [theme, setTheme] = useState("light");
+  const breakpoint = 400;
+
+  function useLocalStorage() {
+    useEffect(() => {
+      localStorage.setItem("theme", JSON.stringify(theme));
+    }, [theme]);
+  }
+
+  const useWindowSize = function () {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+
+    useEffect(() => {
+      const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }, [breakpoint]);
+
+    return isMobile;
+  };
+  const isMobile = useWindowSize();
+
+  useLocalStorage();
 
   return (
-    <div className="App">
+    <div
+      style={{
+        backgroundColor: theme === "light" ? "#fff" : "#333",
+        height: "100dvh",
+      }}
+      className="App"
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -65,6 +95,13 @@ function App() {
           ))}
         </ul>
       </article>
+      <button
+        onClick={() =>
+          !isMobile && setTheme((t) => (t === "light" ? "dark" : "light"))
+        }
+      >
+        Toggle Theme
+      </button>
     </div>
   );
 }
